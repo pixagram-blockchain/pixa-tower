@@ -1,0 +1,35 @@
+{
+  "name": "pixa-tower",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pixa Tower: block scanner, metrics, alerts and public API for the Pixa chain, on Cloudflare Workers",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "fixtures": "node scripts/fetch-fixtures.mjs",
+    "setup": "node scripts/setup.mjs",
+    "migrate": "node scripts/migrate.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "secrets": "node scripts/secrets.mjs",
+    "admin": "node scripts/admin.mjs",
+    "dev:core": "wrangler dev -c apps/core/wrangler.jsonc --persist-to .wrangler/state --port 8787 --test-scheduled",
+    "dev:api": "wrangler dev -c apps/api/wrangler.jsonc --persist-to .wrangler/state --port 8788",
+    "migrate:local": "wrangler d1 migrations apply tower-db -c apps/core/wrangler.jsonc --local --persist-to .wrangler/state"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260926.1",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4",
+    "wrangler": "4.144.0"
+  }
+}

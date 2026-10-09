@@ -1,0 +1,123 @@
+// tower-core: scanner Durable Object, cron jobs and job queue. No public route.
+// Resource ids are filled in by `npm run setup -- --env <staging|production>`.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "tower-core",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  "limits": { "cpu_ms": 120000 },
+
+  "vars": {
+    "ENVIRONMENT": "local",
+    "CHAIN_NODES": "https://api.pixagram.com",
+    "START_BLOCK": "1",
+    "RESTRICTED_ACCOUNTS": "pixa.rex,pixa.team",
+    "DPF_ACCOUNT": "pixa.omnibus",
+    "OPERATING_ACCOUNT": "pixa",
+    "TREASURY_SCHEDULE_ACCOUNT": "pixa.rex",
+    "TGE_TIME": "1788480000",
+    "EXCHANGE_ACCOUNTS": "",
+    "ONBOARDING_ACCOUNTS": "",
+    "CONTROVERSY_MIN_VOTES": "5",
+    "LIVE_BATCH": "20",
+    "BACKFILL_BATCH": "200",
+    "MAX_BLOCKS_PER_TICK": "2000",
+    "MAX_STATEMENTS_PER_TICK": "5000",
+    "VERIFY_SECOND_NODE": "true",
+    "ARCHIVE_RAW": "false",
+    "BALANCE_FULL_REFRESH_MAX": "20000",
+    "PUBLIC_BASE_URL": ""
+  },
+
+  "triggers": { "crons": ["*/5 * * * *", "7 * * * *", "15 0 * * *"] },
+
+  "durable_objects": { "bindings": [{ "name": "SCANNER", "class_name": "Scanner" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Scanner"] }],
+
+  "d1_databases": [
+    { "binding": "DB", "database_name": "tower-db", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "../../migrations" }
+  ],
+  "kv_namespaces": [{ "binding": "CACHE", "id": "00000000000000000000000000000000" }],
+  "r2_buckets": [{ "binding": "ARCHIVE", "bucket_name": "tower-archive" }],
+  "queues": {
+    "producers": [{ "binding": "JOBS", "queue": "tower-jobs" }],
+    "consumers": [{ "queue": "tower-jobs", "max_batch_size": 1, "max_retries": 5, "max_batch_timeout": 5 }]
+  },
+
+  "env": {
+    "staging": {
+      "name": "tower-core-staging",
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "CHAIN_NODES": "https://api.pixagram.com",
+        "START_BLOCK": "1",
+        "RESTRICTED_ACCOUNTS": "pixa.rex,pixa.team",
+        "DPF_ACCOUNT": "pixa.omnibus",
+        "OPERATING_ACCOUNT": "pixa",
+        "TREASURY_SCHEDULE_ACCOUNT": "pixa.rex",
+        "TGE_TIME": "1788480000",
+        "EXCHANGE_ACCOUNTS": "",
+        "ONBOARDING_ACCOUNTS": "",
+        "CONTROVERSY_MIN_VOTES": "5",
+        "LIVE_BATCH": "20",
+        "BACKFILL_BATCH": "200",
+        "MAX_BLOCKS_PER_TICK": "2000",
+        "MAX_STATEMENTS_PER_TICK": "5000",
+        "VERIFY_SECOND_NODE": "true",
+        "ARCHIVE_RAW": "false",
+        "BALANCE_FULL_REFRESH_MAX": "20000",
+        "PUBLIC_BASE_URL": ""
+      },
+      "triggers": { "crons": ["*/5 * * * *", "7 * * * *", "15 0 * * *"] },
+      "durable_objects": { "bindings": [{ "name": "SCANNER", "class_name": "Scanner" }] },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "tower-db-staging", "database_id": "__D1_ID_STAGING__", "migrations_dir": "../../migrations" }
+      ],
+      "kv_namespaces": [{ "binding": "CACHE", "id": "__KV_ID_STAGING__" }],
+      "r2_buckets": [{ "binding": "ARCHIVE", "bucket_name": "tower-archive-staging" }],
+      "queues": {
+        "producers": [{ "binding": "JOBS", "queue": "tower-jobs-staging" }],
+        "consumers": [{ "queue": "tower-jobs-staging", "max_batch_size": 1, "max_retries": 5, "max_batch_timeout": 5 }]
+      }
+    },
+    "production": {
+      "name": "tower-core",
+      "vars": {
+        "ENVIRONMENT": "production",
+        "CHAIN_NODES": "https://api.pixagram.com",
+        "START_BLOCK": "1",
+        "RESTRICTED_ACCOUNTS": "pixa.rex,pixa.team",
+        "DPF_ACCOUNT": "pixa.omnibus",
+        "OPERATING_ACCOUNT": "pixa",
+        "TREASURY_SCHEDULE_ACCOUNT": "pixa.rex",
+        "TGE_TIME": "1788480000",
+        "EXCHANGE_ACCOUNTS": "",
+        "ONBOARDING_ACCOUNTS": "",
+        "CONTROVERSY_MIN_VOTES": "5",
+        "LIVE_BATCH": "20",
+        "BACKFILL_BATCH": "200",
+        "MAX_BLOCKS_PER_TICK": "2000",
+        "MAX_STATEMENTS_PER_TICK": "5000",
+        "VERIFY_SECOND_NODE": "true",
+        "ARCHIVE_RAW": "true",
+        "BALANCE_FULL_REFRESH_MAX": "20000",
+        "PUBLIC_BASE_URL": "https://tower.pixa.org"
+      },
+      "triggers": { "crons": ["*/5 * * * *", "7 * * * *", "15 0 * * *"] },
+      "durable_objects": { "bindings": [{ "name": "SCANNER", "class_name": "Scanner" }] },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "tower-db", "database_id": "__D1_ID_PRODUCTION__", "migrations_dir": "../../migrations" }
+      ],
+      "kv_namespaces": [{ "binding": "CACHE", "id": "__KV_ID_PRODUCTION__" }],
+      "r2_buckets": [{ "binding": "ARCHIVE", "bucket_name": "tower-archive" }],
+      "queues": {
+        "producers": [{ "binding": "JOBS", "queue": "tower-jobs" }],
+        "consumers": [{ "queue": "tower-jobs", "max_batch_size": 1, "max_retries": 5, "max_batch_timeout": 5 }]
+      }
+    }
+  }
+}

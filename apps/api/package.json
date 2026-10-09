@@ -1,0 +1,7 @@
+{
+  "name": "@tower/api-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@tower/core": "1.0.0" }
+}

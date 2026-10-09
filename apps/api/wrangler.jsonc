@@ -1,0 +1,63 @@
+// tower-api: public read-only /v1 API and admin routes (behind Cloudflare Access).
+// Resource ids are filled in by `npm run setup -- --env <staging|production>`.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "tower-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 },
+
+  "vars": {
+    "PUBLIC_BASE_URL": "http://localhost:8788",
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    "STALE_RED_BLOCKS": "1200"
+  },
+
+  "d1_databases": [
+    { "binding": "DB", "database_name": "tower-db", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "../../migrations" }
+  ],
+  "kv_namespaces": [{ "binding": "CACHE", "id": "00000000000000000000000000000000" }],
+  "services": [{ "binding": "CORE", "service": "tower-core" }],
+  "queues": { "producers": [{ "binding": "JOBS", "queue": "tower-jobs" }] },
+  "ratelimits": [{ "name": "RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } }],
+
+  "env": {
+    "staging": {
+      "name": "tower-api-staging",
+      "workers_dev": true,
+      "vars": {
+        "PUBLIC_BASE_URL": "",
+        "ACCESS_TEAM_DOMAIN": "",
+        "ACCESS_AUD": "",
+        "STALE_RED_BLOCKS": "1200"
+      },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "tower-db-staging", "database_id": "__D1_ID_STAGING__", "migrations_dir": "../../migrations" }
+      ],
+      "kv_namespaces": [{ "binding": "CACHE", "id": "__KV_ID_STAGING__" }],
+      "services": [{ "binding": "CORE", "service": "tower-core-staging" }],
+      "queues": { "producers": [{ "binding": "JOBS", "queue": "tower-jobs-staging" }] },
+      "ratelimits": [{ "name": "RATE_LIMITER", "namespace_id": "1002", "simple": { "limit": 120, "period": 60 } }]
+    },
+    "production": {
+      "name": "tower-api",
+      "workers_dev": false,
+      "routes": [{ "pattern": "tower.pixa.org", "custom_domain": true }],
+      "vars": {
+        "PUBLIC_BASE_URL": "https://tower.pixa.org",
+        "ACCESS_TEAM_DOMAIN": "__ACCESS_TEAM_DOMAIN__",
+        "ACCESS_AUD": "__ACCESS_AUD__",
+        "STALE_RED_BLOCKS": "1200"
+      },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "tower-db", "database_id": "__D1_ID_PRODUCTION__", "migrations_dir": "../../migrations" }
+      ],
+      "kv_namespaces": [{ "binding": "CACHE", "id": "__KV_ID_PRODUCTION__" }],
+      "services": [{ "binding": "CORE", "service": "tower-core" }],
+      "queues": { "producers": [{ "binding": "JOBS", "queue": "tower-jobs" }] },
+      "ratelimits": [{ "name": "RATE_LIMITER", "namespace_id": "1003", "simple": { "limit": 120, "period": 60 } }]
+    }
+  }
+}
